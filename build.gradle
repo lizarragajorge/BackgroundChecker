@@ -1,0 +1,48 @@
+apply plugin: 'java'
+apply plugin: 'jacoco'
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: "4.+"
+	compile group: 'org.reflections', name: 'reflections', version: '0.9.+'
+    testCompile "org.mockito:mockito-core:2.+"
+}
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+compileJava {
+    options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation" << "-Werror"
+}
+
+compileTestJava {
+    options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation" << "-Werror"
+}
+
+sourceSets.main.java.srcDirs = ['src']
+sourceSets.test.java.srcDirs = ['test']
+
+jacocoTestReport {
+    doFirst{
+        classDirectories = fileTree(
+                dir: './build/classes/main/backgroundcheck',
+			excludes: ['**/ui/*.class']
+                  )
+    }
+
+    reports {
+        xml.enabled false
+        csv.enabled false
+        html.destination "build/reports/coverageHtml"
+    }
+}
+
+task(runui, dependsOn: 'classes', type: JavaExec) {
+    standardInput = System.in
+  main = 'backgroundcheck.ui.BackgroundCheckerConsoleApplication'
+  classpath = sourceSets.main.runtimeClasspath
+}
+
+
+defaultTasks 'clean', 'test', 'jacocoTestReport'
